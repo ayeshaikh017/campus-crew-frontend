@@ -1,6 +1,40 @@
 {
+<<<<<<< HEAD
   "name":"campuscrew-frontend","private":true,"version":"1.0.0","type":"module",
   "scripts":{"dev":"vite --host 0.0.0.0","build":"vite build","preview":"vite preview --host 0.0.0.0"},
   "dependencies":{"@vitejs/plugin-react":"^4.3.4","axios":"^1.7.9","lucide-react":"^0.468.0","react":"^18.3.1","react-dom":"^18.3.1","react-router-dom":"^6.28.1","socket.io-client":"^4.8.1"},
   "devDependencies":{"autoprefixer":"^10.4.20","postcss":"^8.4.49","tailwindcss":"^3.4.16","vite":"^6.0.5"}
 }
+=======
+  "name": "campuscrew-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CampusCrew volunteer and event coordination API",
+  "type": "module",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/seed.js",
+    "seed:reset": "node src/seed.js --reset",
+    "test": "node --test",
+    "check": "node --check src/server.js && node --check src/app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.16",
+    "socket.io": "^4.8.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": { "nodemon": "^3.1.7", "supertest": "^7.0.0" }
+}
+>>>>>>> e06fb085fd42e64b49e23548261fe6d1a832e0d6
