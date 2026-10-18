@@ -126,3 +126,10 @@ a.approve-btn{display:inline-flex;align-items:center;gap:5px;text-decoration:non
 .admin-event-row:hover{background:#fafaff}
 @media(max-width:900px){.manage-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.manage-actions{width:100%}.manage-actions .btn{flex:1;justify-content:center}}
+
+/* ===== v4: mobile menu scrolls so Log out is always reachable ===== */
+.sidebar{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;height:100vh;height:100dvh;padding-bottom:calc(15px + env(safe-area-inset-bottom,0px))}
+.sidebar-bottom{flex-shrink:0;padding-top:14px}
+.side-nav{flex-shrink:0}
+@media(max-width:900px){.sidebar.mobile-open{touch-action:pan-y}}
+@media(max-width:900px) and (max-height:900px){.help-card{display:none}.workspace{margin-top:20px}}
