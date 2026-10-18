@@ -116,3 +116,13 @@ a.approve-btn{display:inline-flex;align-items:center;gap:5px;text-decoration:non
   .ep-section-head>.btn{width:100%;justify-content:center}
   .ep-picker{padding:12px}
 }
+
+/* ===== v3: simple Manage campus ===== */
+.manage-actions{display:flex;gap:10px;flex-wrap:wrap}
+.manage-stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
+.manage-stats .stat-card{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:16px}
+.manage-stats .stat-card b{font-size:24px}
+.status-pill.status-pending{background:#fff6e0;color:#9a6b12}
+.admin-event-row:hover{background:#fafaff}
+@media(max-width:900px){.manage-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.manage-actions{width:100%}.manage-actions .btn{flex:1;justify-content:center}}

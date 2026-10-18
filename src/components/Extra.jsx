@@ -4,8 +4,8 @@ import api,{payload,errorMessage} from '../lib/api';
 import {useAuth} from '../context/AuthContext';
 import {Button,Field,Notice,Spinner,Empty} from './UI';
 
-export const roleLabel=r=>r==='admin'?'Admin':r==='coordinator'?'Teacher':'Student';
-export const isTeacherRole=r=>r==='coordinator'||r==='admin';
+export const roleLabel=r=>r==='coordinator'?'Teacher':'Student';
+export const isTeacherRole=r=>r==='coordinator';
 const statusLabel={todo:'To do',in_progress:'In progress',completed:'Completed'};
 const fmtDate=d=>d?new Date(d).toLocaleDateString('en',{month:'short',day:'numeric'}):'No due date';
 
@@ -14,7 +14,7 @@ export function RoleSelect(){
   const {me,chooseRole,refreshMe,logout}=useAuth();
   const [pick,setPick]=useState('');const [code,setCode]=useState('');
   const [busy,setBusy]=useState(false);const [error,setError]=useState('');
-  const knownTeacher=me.isTeacher||me.role==='coordinator';
+  const knownTeacher=me.isTeacher||me.role==='coordinator'||me.role==='admin';
   async function go(role){
     setBusy(true);setError('');
     try{await chooseRole(role,code)}catch(e){setError(errorMessage(e))}finally{setBusy(false)}
@@ -33,7 +33,7 @@ export function RoleSelect(){
         <span className="role-icon role-icon-alt"><BookOpen size={26}/></span><b>Login as Teacher</b>
         <small>See student volunteers live, assign each one a task, and message them.</small>
         {pick==='teacher'&&<form className="role-code" onClick={e=>e.stopPropagation()} onSubmit={e=>{e.preventDefault();go('teacher')}}>
-          {!knownTeacher&&<Field label="Teacher access code" type="password" value={code} onChange={e=>setCode(e.target.value)} placeholder="Ask your admin" autoFocus required/>}
+          {!knownTeacher&&<Field label="Teacher access code" type="password" value={code} onChange={e=>setCode(e.target.value)} placeholder="Ask your college for the code" autoFocus required/>}
           <Button type="submit" disabled={busy}>{busy?'Please wait…':'Continue as Teacher'} <ArrowRight size={16}/></Button>
         </form>}
       </div>
