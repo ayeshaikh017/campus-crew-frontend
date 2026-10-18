@@ -154,6 +154,90 @@ export function TeacherVolunteers({setToast}){
   </div>;
 }
 
+/* ---------- Teacher: add / manage people on one event ---------- */
+function StudentPicker({event,type,taken,onAdded,onClose,setToast}){
+  const [q,setQ]=useState(''),[users,setUsers]=useState([]),[busy,setBusy]=useState(true),[err,setErr]=useState(''),[adding,setAdding]=useState(''),[workRole,setWorkRole]=useState('');
+  const isVol=type==='volunteer';
+  useEffect(()=>{
+    let live=true;setBusy(true);
+    const t=setTimeout(async()=>{
+      try{
+        const d=payload(await api.get('/users/directory?search='+encodeURIComponent(q.trim())));
+        if(live){setUsers((d.users||[]).filter(u=>u.role==='volunteer'));setErr('')}
+      }catch(e){if(live)setErr(errorMessage(e))}finally{if(live)setBusy(false)}
+    },q?250:0);
+    return()=>{live=false;clearTimeout(t)};
+  },[q]);
+  async function add(u){
+    setAdding(u._id);setErr('');
+    try{
+      await api.post(`/events/${event._id}/members`,{userId:u._id,type,workRole:isVol&&workRole.trim()?workRole.trim():undefined});
+      setToast?.(`${u.name} added as ${isVol?'volunteer':'participant'}`);onAdded();
+    }catch(e){setErr(errorMessage(e))}finally{setAdding('')}
+  }
+  const list=users.filter(u=>!taken.has(String(u._id)));
+  return <div className="ep-picker">
+    <div className="ep-picker-head"><b>{isVol?'Pick students to add as volunteers':'Pick students to add as participants'}</b><button type="button" className="icon-button" onClick={onClose} aria-label="Close"><X size={16}/></button></div>
+    <Notice>{err}</Notice>
+    {isVol&&<Field label="Their job at this event (optional)" value={workRole} onChange={e=>setWorkRole(e.target.value)} maxLength={100} placeholder="e.g. Registration desk, Stage help"/>}
+    <Field label="Search student by name" value={q} onChange={e=>setQ(e.target.value)} placeholder="Type a name…"/>
+    {busy?<Spinner/>:list.length?<div className="ep-pick-list">{list.map(u=><div className="ep-row" key={u._id}>
+      <span className="ep-avatar">{u.name?.slice(0,1)}</span>
+      <span className="ep-who"><b>{u.name}</b><small>{[u.collegeId,u.department,u.academicYear].filter(Boolean).join(' · ')||'Student'}</small></span>
+      <Button type="button" onClick={()=>add(u)} disabled={adding===u._id}><Plus size={14}/> {adding===u._id?'Adding…':'Add'}</Button>
+    </div>)}</div>:<p className="ep-empty">{q?'No student found with that name.':'No more students to add.'}</p>}
+    <div className="form-actions"><Button type="button" variant="outline" onClick={onClose}>Done</Button></div>
+  </div>;
+}
+
+export function EventPeople({event,setToast}){
+  const {socket}=useAuth();
+  const [regs,setRegs]=useState([]),[busy,setBusy]=useState(true),[error,setError]=useState(''),[pick,setPick]=useState('');
+  const load=useCallback(async()=>{
+    try{setRegs(payload(await api.get(`/events/${event._id}/registrations`)).registrations||[]);setError('')}
+    catch(e){setError(errorMessage(e))}finally{setBusy(false)}
+  },[event._id]);
+  useEffect(()=>{load()},[load]);
+  useEffect(()=>{
+    if(!socket)return;
+    const f=d=>{if(!d?.eventId||d.eventId===event._id)load()};
+    socket.on('registration:new',f);return()=>socket.off('registration:new',f);
+  },[socket,load,event._id]);
+  const vols=regs.filter(r=>r.type==='volunteer_applicant'&&['pending','approved'].includes(r.status));
+  const parts=regs.filter(r=>r.type==='participant'&&r.status==='approved');
+  const takenVol=new Set(vols.map(r=>String(r.userId._id))),takenPart=new Set(parts.map(r=>String(r.userId._id)));
+  async function decide(r,decision){
+    try{await api.patch(`/events/${event._id}/registrations/${r._id}`,{decision});setToast?.(decision==='approve'?'Volunteer approved':'Application rejected');load()}
+    catch(e){setError(errorMessage(e))}
+  }
+  async function remove(r){
+    if(!confirm(`Remove ${r.userId.name} from this event?`))return;
+    try{await api.delete(`/events/${event._id}/members/${r._id}`);load()}catch(e){setError(errorMessage(e))}
+  }
+  const row=r=><div className="ep-row" key={r._id}>
+    <span className="ep-avatar">{r.userId.name?.slice(0,1)}</span>
+    <span className="ep-who"><b>{r.userId.name}</b><small>{[r.workRole,r.userId.collegeId,r.userId.department].filter(Boolean).join(' · ')||'Student'}</small></span>
+    {r.status==='pending'?<span className="ep-actions"><button type="button" className="approve-btn" onClick={()=>decide(r,'approve')}><Check size={14}/> Approve</button><button type="button" className="reject-btn" onClick={()=>decide(r,'reject')}>Reject</button></span>
+    :<span className="ep-actions"><button type="button" className="reject-btn" onClick={()=>remove(r)}>Remove</button></span>}
+  </div>;
+  const section=({type,title,hint,rows,taken,icon:Icon})=><section className="content-panel ep-section" key={type}>
+    <div className="ep-section-head">
+      <div className="ep-section-title"><span className="ep-icon"><Icon size={18}/></span><div><h2>{title} <span className="ep-count">{rows.length}</span></h2><p>{hint}</p></div></div>
+      <Button onClick={()=>setPick(pick===type?'':type)} variant={pick===type?'outline':'primary'}><Plus size={15}/> {type==='volunteer'?'Add volunteer':'Add participant'}</Button>
+    </div>
+    {pick===type&&<StudentPicker event={event} type={type} taken={taken} setToast={setToast} onAdded={load} onClose={()=>setPick('')}/>}
+    {rows.length?<div className="ep-list">{rows.map(row)}</div>:<p className="ep-empty">Nobody yet. Tap “{type==='volunteer'?'Add volunteer':'Add participant'}” to add students.</p>}
+  </section>;
+  return <div className="ep-wrap">
+    <div className="ep-intro"><b>You are managing this event.</b><span>Students can already see it and can join on their own. You can also add them yourself below.</span></div>
+    <Notice>{error}</Notice>
+    {busy?<Spinner/>:<>
+      {section({type:'volunteer',title:'Volunteers',hint:'Students who help run the event. Applications from students wait here for your approval.',rows:vols,taken:takenVol,icon:HeartHandshake})}
+      {section({type:'participant',title:'Participants',hint:'Students who are attending the event.',rows:parts,taken:takenPart,icon:Users})}
+    </>}
+  </div>;
+}
+
 /* ---------- Chat: student <-> teacher, real time ---------- */
 export function ChatWidget(){
   const {me,socket}=useAuth();

@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-﻿node_modules/
+node_modules/
 dist/
 build/
 
@@ -14,23 +13,13 @@ yarn-debug.log*
 pnpm-debug.log*
 *.log
 
-# Editor files
+# Editor / OS files
 .vscode/
 .idea/
-
-# Operating system files
 .DS_Store
 Thumbs.db
 
-# Testing
+# Testing / temp
 coverage/
-
-# Temporary files
 *.tmp
 *.temp
-=======
-node_modules/
-.env
-coverage/
-.DS_Store
->>>>>>> e06fb085fd42e64b49e23548261fe6d1a832e0d6
