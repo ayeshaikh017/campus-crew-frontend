@@ -1,10 +1,9 @@
 {
   "name": "campuscrew-frontend",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
   "type": "module",
   "license": "UNLICENSED",
-  "private": true,
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
@@ -26,4 +25,3 @@
     "vite": "^6.0.5"
   }
 }
-
