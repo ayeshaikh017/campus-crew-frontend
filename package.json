@@ -24,3 +24,6 @@
     "vite": "^6.0.5"
   }
 }
+
+"license": "UNLICENSED",
+"private": true,
